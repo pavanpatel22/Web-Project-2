@@ -1,4 +1,4 @@
-# INFO 6150 React Project Template
+# INFO 6150 Project
 
 A minimal Vite + React + TypeScript project template using @tanstack/react-router.
 
