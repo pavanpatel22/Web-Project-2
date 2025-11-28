@@ -5,11 +5,12 @@ import {
 } from "@tanstack/react-router";
 import { routeTree } from "./pages";
 
+// Custom createTree function for building route trees
 export function createTree(
   parent: AnyRoute,
-  ...createFns: ((parent: AnyRoute) => AnyRoute)[]
+  ...routes: ((parent: AnyRoute) => AnyRoute)[]
 ) {
-  return parent.addChildren(createFns.map((fn) => fn(parent)));
+  return parent.addChildren(routes.map(route => route(parent)));
 }
 
 const router = createRouter({
@@ -17,6 +18,13 @@ const router = createRouter({
   defaultPreload: "intent",
   scrollRestoration: true,
 });
+
+// Register the router for type safety
+declare module "@tanstack/react-router" {
+  interface Register {
+    router: typeof router;
+  }
+}
 
 export function RouterProvider() {
   return <TanRouterProvider router={router} />;
