@@ -29,7 +29,7 @@ export default function Root() {
       <nav className="navbar">
         <div className="nav-container">
           <Link to="/" className="nav-logo">
-            <span className="logo-text">AC</span>
+            <span className="logo-text">PP</span>
           </Link>
           <div className="nav-links">
             <Link to="/" className="nav-link" activeProps={{ className: "nav-link active" }}>
@@ -57,7 +57,7 @@ export default function Root() {
 
       <footer className="footer">
         <div className="footer-content">
-          <p>&copy; 2024 Alex Chen. Crafted with purpose in Brooklyn.</p>
+          <p>&copy; 2024 Pavan Patel. Crafted with purpose in Brooklyn.</p>
           <div className="social-links">
             <a href="#" className="social-link">GitHub</a>
             <a href="#" className="social-link">LinkedIn</a>

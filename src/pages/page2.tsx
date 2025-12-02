@@ -22,7 +22,7 @@ function ContactPage() {
             <div className="contact-icon">📧</div>
             <div>
               <h3>Email</h3>
-              <p>alex@example.com</p>
+              <p>pp@example.com</p>
             </div>
           </div>
           <div className="contact-item">

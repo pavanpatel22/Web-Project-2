@@ -34,7 +34,7 @@ function HomePage() {
       <section className="hero">
         <h1>Creating digital experiences that matter</h1>
         <p className="hero-subtitle">
-          I'm Alex Chen, a creative developer passionate about building 
+          I'm Pavan Patel, a creative developer passionate about building 
           innovative solutions that bridge technology and human needs.
         </p>
         <a href="/about" className="cta-button">

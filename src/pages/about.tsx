@@ -17,7 +17,7 @@ function AboutPage() {
       <div className="about-content">
         <div className="about-text">
           <p>
-            Hello! I'm Alex Chen, a creative developer with over 8 years of experience 
+            Hello! I'm Pavan Patel, a creative developer with over 2 years of experience 
             building digital products that users love. My journey started in computer science, 
             but I quickly discovered my passion lies at the intersection of technology and design.
           </p>

@@ -1,6 +1,7 @@
 import { createRoute, type AnyRoute, Link } from "@tanstack/react-router";
 import { createTree } from "../../router";
 import article from "./article";
+import { Outlet } from "@tanstack/react-router";
 
 export default (parent: AnyRoute) => {
   const blogRoute = createRoute({
@@ -66,6 +67,7 @@ function BlogPage() {
           </Link>
         ))}
       </div>
+      <Outlet />
     </div>
   );
 }
