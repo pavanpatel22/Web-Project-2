@@ -17,22 +17,21 @@ function AboutPage() {
       <div className="about-content">
         <div className="about-text">
           <p>
-            Hello! I'm Pavan Patel, a creative developer with over 2 years of experience 
-            building digital products that users love. My journey started in computer science, 
-            but I quickly discovered my passion lies at the intersection of technology and design.
+            Hi! I'm Pavan Patel, a passionate developer who loves turning ideas into digital experiences. 
+            Over the past few years, I've worked on a variety of projects ranging from sleek web applications 
+            to scalable backend systems, always aiming to create solutions that are both functional and elegant.
           </p>
           
           <p>
-            I specialize in creating seamless user experiences through thoughtful design 
-            and robust engineering. Whether it's a responsive web application or a 
-            complex backend system, I believe in writing clean, maintainable code that 
-            stands the test of time.
+            My focus is on crafting seamless user experiences, writing maintainable code, and embracing modern 
+            technologies. I enjoy solving complex problems and finding innovative ways to improve both performance 
+            and usability in every project I undertake.
           </p>
 
           <p>
-            When I'm not coding, you can find me exploring new hiking trails, experimenting 
-            with photography, or contributing to open-source projects. I'm always excited 
-            about new challenges and opportunities to learn.
+            Outside of coding, I’m an avid explorer—whether it’s hiking through scenic trails, 
+            capturing moments through photography, or experimenting with new technologies. 
+            I thrive in environments that challenge me to learn, adapt, and grow.
           </p>
         </div>
 
@@ -43,7 +42,7 @@ function AboutPage() {
               <li>React & TypeScript</li>
               <li>Vue.js & Nuxt</li>
               <li>Next.js & Remix</li>
-              <li>CSS-in-JS & Tailwind</li>
+              <li>Tailwind CSS & Styled Components</li>
             </ul>
           </div>
 

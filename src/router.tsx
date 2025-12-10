@@ -17,6 +17,7 @@ const router = createRouter({
   routeTree,
   defaultPreload: "intent",
   scrollRestoration: true,
+  defaultStaleTime: 5000, // Cache for 5 seconds
 });
 
 // Register the router for type safety
