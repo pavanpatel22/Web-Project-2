@@ -1,12 +1,14 @@
-import { createRootRoute } from "@tanstack/react-router";
+import { createRootRoute, createRoute, type AnyRoute } from "@tanstack/react-router";
 import page1 from "./page1";
 import page2 from "./page2";
 import about from "./about";
 import blog from "./blog";
 import home from "./home";
+import profile from "./auth/profile";
 import { createTree } from "../router";
 import Root from "./root";
-
+import LoginPage from "./auth/login";
+import RegisterPage from "./auth/register";
 
 export const rootRoute = createRootRoute({
   component: Root,
@@ -104,11 +106,30 @@ function ProjectNotFoundPage() {
   );
 }
 
+// Create auth route wrappers
+const loginRoute = (parent: AnyRoute) =>
+  createRoute({
+    path: "/auth/login",
+    getParentRoute: () => parent,
+    component: LoginPage,
+  });
+
+const registerRoute = (parent: AnyRoute) =>
+  createRoute({
+    path: "/auth/register",
+    getParentRoute: () => parent,
+    component: RegisterPage,
+  });
+
+// Create the route tree with all routes including auth routes
 export const routeTree = createTree(
   rootRoute,
   home,
   page1,
   page2,
   blog,
-  about
+  about,
+  loginRoute,
+  registerRoute,
+  profile
 );

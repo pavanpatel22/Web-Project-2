@@ -1,7 +1,10 @@
 import { Link, Outlet } from "@tanstack/react-router";
 import { useEffect } from 'react';
+import { useAuth } from '../components/AuthProvider';
 
 export default function Root() {
+  const { isAuthenticated, user, signOut } = useAuth();
+
   useEffect(() => {
     // Add smooth scrolling
     const handleAnchorClick = (e: MouseEvent) => {
@@ -47,6 +50,46 @@ export default function Root() {
             <Link to="/about" className="nav-link" activeProps={{ className: "nav-link active" }}>
               About
             </Link>
+            
+            {/* Auth Links */}
+            {isAuthenticated ? (
+              <>
+                <Link to="/profile" className="nav-link" activeProps={{ className: "nav-link active" }}>
+                  Profile
+                </Link>
+                <button
+                  onClick={signOut}
+                  className="nav-link"
+                  style={{
+                    background: 'none',
+                    border: 'none',
+                    cursor: 'pointer',
+                    padding: '0.5rem 0',
+                    fontWeight: 500
+                  }}
+                >
+                  Sign Out
+                </button>
+              </>
+            ) : (
+              <>
+                <Link to="/auth/login" className="nav-link" activeProps={{ className: "nav-link active" }}>
+                  Login
+                </Link>
+                <Link 
+                  to="/auth/register" 
+                  className="nav-link"
+                  style={{
+                    background: 'var(--gradient)',
+                    padding: '0.5rem 1rem',
+                    borderRadius: '8px',
+                    color: 'white'
+                  }}
+                >
+                  Sign Up
+                </Link>
+              </>
+            )}
           </div>
         </div>
       </nav>

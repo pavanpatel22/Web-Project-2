@@ -14,6 +14,7 @@ export default function RegisterPage() {
   const [success, setSuccess] = useState('')
   const [loading, setLoading] = useState(false)
   const [showPassword, setShowPassword] = useState(false)
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false)
 
   const { signUp, signInWithGoogle } = useAuth()
   const navigate = useNavigate()
@@ -25,6 +26,19 @@ export default function RegisterPage() {
       [name]: type === 'checkbox' ? checked : value
     }))
   }
+
+  const getPasswordStrength = (password: string) => {
+    let strength = 0
+    if (password.length >= 8) strength++
+    if (password.match(/[a-z]/) && password.match(/[A-Z]/)) strength++
+    if (password.match(/[0-9]/)) strength++
+    if (password.match(/[^a-zA-Z0-9]/)) strength++
+    return strength
+  }
+
+  const passwordStrength = getPasswordStrength(formData.password)
+  const strengthLabels = ['Weak', 'Fair', 'Good', 'Strong']
+  const strengthColors = ['#ef4444', '#f59e0b', '#10b981', '#22c55e']
 
   const validateForm = () => {
     if (!formData.name.trim()) {
@@ -69,8 +83,7 @@ export default function RegisterPage() {
       })
 
       if (result.success) {
-        setSuccess(result.message || 'Registration successful! Please check your email to confirm your account.')
-        // Clear form
+        setSuccess('Account created successfully! Redirecting to login...')
         setFormData({
           name: '',
           email: '',
@@ -79,15 +92,14 @@ export default function RegisterPage() {
           agreeToTerms: false
         })
         
-        // Redirect to login after 3 seconds
         setTimeout(() => {
           navigate({ to: '/auth/login' })
-        }, 3000)
+        }, 2000)
       } else {
-        setError(result.message || 'Registration failed')
+        setError(result.message || 'Registration failed. Please try again.')
       }
     } catch (err: any) {
-      setError(err.message || 'An error occurred during registration')
+      setError(err.message || 'An unexpected error occurred. Please try again.')
     } finally {
       setLoading(false)
     }
@@ -106,123 +118,192 @@ export default function RegisterPage() {
   }
 
   return (
-    <div className="min-h-[80vh] flex items-center justify-center px-4 py-8">
-      <div className="max-w-md w-full">
-        <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold">Create Account</h1>
-          <p className="text-gray-600 dark:text-gray-400 mt-2">
-            Join our community and start your journey
-          </p>
+    <div className="auth-container">
+      <div className="auth-bg-gradient">
+        <div className="auth-orb"></div>
+        <div className="auth-orb"></div>
+        <div className="auth-orb"></div>
+      </div>
+
+      <div className="auth-wrapper">
+        <div className="auth-header">
+          <h1>Create Account</h1>
+          <p>Join our community and start your journey today</p>
         </div>
 
-        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-8">
+        <div className="auth-card">
           {error && (
-            <div className="mb-6 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg text-red-600 dark:text-red-400">
+            <div className="auth-alert auth-alert-error">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                <circle cx="12" cy="12" r="10" strokeWidth="2"/>
+                <path d="M12 8v4m0 4h.01" strokeWidth="2" strokeLinecap="round"/>
+              </svg>
               {error}
             </div>
           )}
 
           {success && (
-            <div className="mb-6 p-4 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg text-green-600 dark:text-green-400">
+            <div className="auth-alert auth-alert-success">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                <polyline points="22 4 12 14.01 9 11.01" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
               {success}
             </div>
           )}
 
-          <form onSubmit={handleSubmit} className="space-y-6">
-            <div>
-              <label className="block text-sm font-medium mb-2">
+          <form onSubmit={handleSubmit} className="auth-form">
+            <div className="auth-form-group">
+              <label htmlFor="name" className="auth-form-label">
                 Full Name
               </label>
               <input
+                id="name"
                 type="text"
                 name="name"
                 value={formData.name}
                 onChange={handleChange}
-                className="w-full px-4 py-3 border dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent dark:bg-gray-900"
+                className="auth-form-input"
                 placeholder="John Doe"
                 required
                 disabled={loading}
+                autoComplete="name"
               />
             </div>
 
-            <div>
-              <label className="block text-sm font-medium mb-2">
+            <div className="auth-form-group">
+              <label htmlFor="email" className="auth-form-label">
                 Email Address
               </label>
               <input
+                id="email"
                 type="email"
                 name="email"
                 value={formData.email}
                 onChange={handleChange}
-                className="w-full px-4 py-3 border dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent dark:bg-gray-900"
+                className="auth-form-input"
                 placeholder="you@example.com"
                 required
                 disabled={loading}
+                autoComplete="email"
               />
             </div>
 
-            <div>
-              <label className="block text-sm font-medium mb-2">
+            <div className="auth-form-group">
+              <label htmlFor="password" className="auth-form-label">
                 Password
               </label>
-              <div className="relative">
+              <div className="auth-password-wrapper">
                 <input
-                  type={showPassword ? "text" : "password"}
+                  id="password"
+                  type={showPassword ? 'text' : 'password'}
                   name="password"
                   value={formData.password}
                   onChange={handleChange}
-                  className="w-full px-4 py-3 border dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent dark:bg-gray-900 pr-12"
+                  className="auth-form-input with-icon"
                   placeholder="••••••••"
                   required
                   disabled={loading}
+                  autoComplete="new-password"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700 dark:hover:text-gray-300"
+                  className="auth-password-toggle"
+                  aria-label={showPassword ? 'Hide password' : 'Show password'}
                 >
-                  {showPassword ? 'Hide' : 'Show'}
+                  {showPassword ? (
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                      <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                      <line x1="1" y1="1" x2="23" y2="23" strokeWidth="2" strokeLinecap="round"/>
+                    </svg>
+                  ) : (
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                      <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                      <circle cx="12" cy="12" r="3" strokeWidth="2"/>
+                    </svg>
+                  )}
                 </button>
               </div>
-              <p className="mt-2 text-sm text-gray-500">
-                Must be at least 8 characters long
-              </p>
+              {formData.password && (
+                <div style={{ marginTop: '0.5rem' }}>
+                  <div style={{ display: 'flex', gap: '0.25rem', marginBottom: '0.25rem' }}>
+                    {[0, 1, 2, 3].map((i) => (
+                      <div
+                        key={i}
+                        style={{
+                          flex: 1,
+                          height: '4px',
+                          borderRadius: '2px',
+                          background: i < passwordStrength ? strengthColors[passwordStrength - 1] : 'var(--border)',
+                          transition: 'background 0.3s ease'
+                        }}
+                      />
+                    ))}
+                  </div>
+                  <p className="auth-form-helper" style={{ color: passwordStrength > 0 ? strengthColors[passwordStrength - 1] : 'var(--text-secondary)' }}>
+                    {passwordStrength > 0 ? `Password strength: ${strengthLabels[passwordStrength - 1]}` : 'Must be at least 8 characters'}
+                  </p>
+                </div>
+              )}
             </div>
 
-            <div>
-              <label className="block text-sm font-medium mb-2">
+            <div className="auth-form-group">
+              <label htmlFor="confirmPassword" className="auth-form-label">
                 Confirm Password
               </label>
-              <input
-                type="password"
-                name="confirmPassword"
-                value={formData.confirmPassword}
-                onChange={handleChange}
-                className="w-full px-4 py-3 border dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent dark:bg-gray-900"
-                placeholder="••••••••"
-                required
-                disabled={loading}
-              />
+              <div className="auth-password-wrapper">
+                <input
+                  id="confirmPassword"
+                  type={showConfirmPassword ? 'text' : 'password'}
+                  name="confirmPassword"
+                  value={formData.confirmPassword}
+                  onChange={handleChange}
+                  className="auth-form-input with-icon"
+                  placeholder="••••••••"
+                  required
+                  disabled={loading}
+                  autoComplete="new-password"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                  className="auth-password-toggle"
+                  aria-label={showConfirmPassword ? 'Hide password' : 'Show password'}
+                >
+                  {showConfirmPassword ? (
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                      <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                      <line x1="1" y1="1" x2="23" y2="23" strokeWidth="2" strokeLinecap="round"/>
+                    </svg>
+                  ) : (
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                      <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                      <circle cx="12" cy="12" r="3" strokeWidth="2"/>
+                    </svg>
+                  )}
+                </button>
+              </div>
             </div>
 
-            <div className="flex items-start">
+            <div className="auth-checkbox-wrapper" style={{ marginTop: '0.5rem' }}>
               <input
                 type="checkbox"
+                id="terms"
                 name="agreeToTerms"
                 checked={formData.agreeToTerms}
                 onChange={handleChange}
-                id="terms"
-                className="mt-1 w-4 h-4 text-indigo-600 rounded focus:ring-indigo-500"
+                className="auth-checkbox"
                 required
                 disabled={loading}
               />
-              <label htmlFor="terms" className="ml-2 text-sm">
+              <label htmlFor="terms" className="auth-checkbox-label" style={{ fontSize: '0.875rem' }}>
                 I agree to the{' '}
-                <Link to="/terms" className="text-indigo-600 hover:text-indigo-500">
+                <Link to="/terms" className="auth-link" style={{ fontSize: '0.875rem' }}>
                   Terms of Service
                 </Link>
                 {' '}and{' '}
-                <Link to="/privacy" className="text-indigo-600 hover:text-indigo-500">
+                <Link to="/privacy" className="auth-link" style={{ fontSize: '0.875rem' }}>
                   Privacy Policy
                 </Link>
               </label>
@@ -231,57 +312,49 @@ export default function RegisterPage() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full py-3 px-4 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-lg transition disabled:opacity-50 disabled:cursor-not-allowed"
+              className="auth-submit-button"
             >
-              {loading ? 'Creating Account...' : 'Create Account'}
+              {loading ? (
+                <>
+                  <span className="auth-loading-spinner"></span>
+                  Creating Account...
+                </>
+              ) : (
+                'Create Account'
+              )}
             </button>
 
-            <div className="relative my-6">
-              <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-gray-300 dark:border-gray-700"></div>
-              </div>
-              <div className="relative flex justify-center text-sm">
-                <span className="px-2 bg-white dark:bg-gray-800 text-gray-500">
-                  Or sign up with
-                </span>
-              </div>
+            <div className="auth-divider">
+              <span className="auth-divider-text">Or sign up with</span>
             </div>
 
             <button
               type="button"
               onClick={handleGoogleSignUp}
               disabled={loading}
-              className="w-full py-3 px-4 border dark:border-gray-700 rounded-lg flex items-center justify-center space-x-3 hover:bg-gray-50 dark:hover:bg-gray-900 transition disabled:opacity-50"
+              className="auth-social-button"
             >
-              <svg className="w-5 h-5" viewBox="0 0 24 24">
+              <svg className="auth-social-icon" viewBox="0 0 24 24">
                 <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
                 <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
                 <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
                 <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
               </svg>
-              <span>Continue with Google</span>
+              Continue with Google
             </button>
           </form>
 
-          <div className="mt-8 text-center">
-            <p className="text-gray-600 dark:text-gray-400">
-              Already have an account?{' '}
-              <Link
-                to="/auth/login"
-                className="text-indigo-600 hover:text-indigo-500 font-semibold"
-              >
-                Sign in
-              </Link>
-            </p>
+          <div className="auth-footer">
+            Already have an account?{' '}
+            <Link to="/auth/login" className="auth-footer-link">
+              Sign in
+            </Link>
           </div>
         </div>
 
-        <div className="mt-8 text-center text-sm text-gray-500">
-          <p>
-            Your data is protected by our{' '}
-            <Link to="/privacy" className="underline">Privacy Policy</Link>
-            {' '}and encrypted with industry-standard security.
-          </p>
+        <div className="auth-terms">
+          Your data is protected by our{' '}
+          <Link to="/privacy">Privacy Policy</Link> and encrypted with industry-standard security
         </div>
       </div>
     </div>

@@ -1,6 +1,6 @@
 import { createRoute, type AnyRoute } from "@tanstack/react-router"
 import { ProtectedRoute } from "../../components/ProtectedRoute"
-import {  UserProfile } from "../../components/UserProfile"
+import { useAuth } from "../../hooks/useAuth"
 import { useUserData } from "../../hooks/useUserData"
 import { useState } from "react"
 
@@ -12,31 +12,46 @@ export default (parent: AnyRoute) =>
   })
 
 function ProfilePage() {
+  const { user, profile, signOut, updateProfile } = useAuth()
   const { data, loading, error, refreshData } = useUserData()
   const [activeTab, setActiveTab] = useState('overview')
+  const [isEditing, setIsEditing] = useState(false)
+  const [formData, setFormData] = useState({
+    name: profile?.name || '',
+    bio: profile?.bio || '',
+    location: profile?.location || '',
+    website: profile?.website || '',
+    github: profile?.github || '',
+    linkedin: profile?.linkedin || ''
+  })
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    const result = await updateProfile(formData)
+    if (result.success) {
+      setIsEditing(false)
+    }
+  }
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-[60vh]">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>
+      <div className="profile-loading">
+        <div className="profile-spinner"></div>
       </div>
     )
   }
 
   if (error) {
     return (
-      <div className="container mx-auto px-4 py-8">
-        <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-6">
-          <h2 className="text-lg font-semibold text-red-800 dark:text-red-400 mb-2">
-            Error Loading Profile
-          </h2>
-          <p className="text-red-600 dark:text-red-300">{error}</p>
-          <button
-            onClick={refreshData}
-            className="mt-4 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition"
-          >
-            Try Again
-          </button>
+      <div className="profile-container">
+        <div className="profile-content">
+          <div className="profile-error">
+            <h2 className="profile-error-title">Error Loading Profile</h2>
+            <p className="profile-error-text">{error}</p>
+            <button onClick={refreshData} className="profile-btn profile-btn-primary">
+              Try Again
+            </button>
+          </div>
         </div>
       </div>
     )
@@ -44,277 +59,349 @@ function ProfilePage() {
 
   return (
     <ProtectedRoute>
-      <div className="container mx-auto px-4 py-8">
-        {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold mb-2">My Profile</h1>
-          <p className="text-gray-600 dark:text-gray-400">
-            Manage your account settings and view your activity
-          </p>
+      <div className="profile-container">
+        <div className="profile-bg-effects">
+          <div className="profile-bg-orb"></div>
+          <div className="profile-bg-orb"></div>
+          <div className="profile-bg-orb"></div>
         </div>
 
-        {/* Tabs */}
-        <div className="border-b border-gray-200 dark:border-gray-700 mb-8">
-          <nav className="flex space-x-8">
-            {['overview', 'posts', 'settings', 'security'].map((tab) => (
-              <button
-                key={tab}
-                onClick={() => setActiveTab(tab)}
-                className={`py-4 px-1 font-medium text-sm border-b-2 transition ${
-                  activeTab === tab
-                    ? 'border-indigo-600 text-indigo-600 dark:text-indigo-400'
-                    : 'border-transparent text-gray-500 hover:text-gray-700 dark:hover:text-gray-300'
-                }`}
-              >
-                {tab.charAt(0).toUpperCase() + tab.slice(1)}
-              </button>
-            ))}
-          </nav>
-        </div>
+        <div className="profile-content">
+          {/* Header */}
+          <div className="profile-header">
+            <h1 className="profile-header-title">My Profile</h1>
+            <p className="profile-header-subtitle">
+              Manage your account settings and view your activity
+            </p>
+          </div>
 
-        {/* Tab Content */}
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
-          {/* Sidebar */}
-          <div className="lg:col-span-1">
-            <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
-              <div className="space-y-4">
-                <div className="flex items-center space-x-3">
-                  <div className="w-12 h-12 rounded-full bg-indigo-100 dark:bg-indigo-900 flex items-center justify-center">
-                    <span className="text-indigo-600 dark:text-indigo-400 font-bold text-xl">
-                      {data?.user?.name?.charAt(0) || 'U'}
-                    </span>
-                  </div>
-                  <div>
-                    <h3 className="font-semibold">{data?.user?.name || 'User'}</h3>
-                    <p className="text-sm text-gray-500">{data?.user?.email}</p>
-                  </div>
-                </div>
-                
-                <div className="pt-4 border-t border-gray-200 dark:border-gray-700">
-                  <div className="space-y-2">
-                    <div className="flex justify-between">
-                      <span className="text-gray-600 dark:text-gray-400">Member since</span>
-                      <span className="font-medium">
-                        {new Date(data?.user?.created_at).toLocaleDateString()}
-                      </span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-gray-600 dark:text-gray-400">Role</span>
-                      <span className="font-medium capitalize">{data?.user?.role}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-gray-600 dark:text-gray-400">Status</span>
-                      <span className="px-2 py-1 text-xs font-semibold bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200 rounded-full">
-                        Active
-                      </span>
-                    </div>
-                  </div>
-                </div>
+          {/* Banner with Avatar and Info */}
+          <div className="profile-banner">
+            <div className="profile-banner-content">
+              <div className="profile-avatar-wrapper">
+                <img
+                  src={profile?.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(profile?.name || user?.email || 'U')}&background=6366f1&color=fff&size=200`}
+                  alt={profile?.name || user?.email}
+                  className="profile-avatar"
+                />
+                <label className="profile-avatar-upload">
+                  <input type="file" accept="image/*" />
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
+                  </svg>
+                </label>
+              </div>
+
+              <div className="profile-info">
+                <h2 className="profile-name">{profile?.name || user?.email}</h2>
+                <p className="profile-email">{user?.email}</p>
+                <span className="profile-badge">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                  </svg>
+                  {profile?.role || 'user'}
+                </span>
+              </div>
+
+              <div className="profile-actions">
+                <button className="profile-btn profile-btn-primary">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                  </svg>
+                  Edit Profile
+                </button>
+                <button onClick={signOut} className="profile-btn profile-btn-danger">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                  </svg>
+                  Sign Out
+                </button>
               </div>
             </div>
           </div>
 
-          {/* Main Content */}
-          <div className="lg:col-span-3">
-            {activeTab === 'overview' && (
-              <div className="space-y-6">
-                <UserProfile />
-                
-                {/* Recent Activity */}
-                <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
-                  <h2 className="text-xl font-semibold mb-4">Recent Activity</h2>
-                  {data?.recentPosts?.length > 0 ? (
-                    <div className="space-y-4">
-                      {data.recentPosts.slice(0, 5).map((post: any) => (
-                        <div
-                          key={post.id}
-                          className="flex items-center justify-between p-4 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-900 transition"
-                        >
-                          <div>
-                            <h4 className="font-medium">{post.title}</h4>
-                            <p className="text-sm text-gray-500">
-                              {new Date(post.created_at).toLocaleDateString()}
-                            </p>
+          {/* Stats Grid */}
+          <div className="profile-stats-grid">
+            <div className="profile-stat-card">
+              <div className="profile-stat-value">{data?.posts?.length || 0}</div>
+              <div className="profile-stat-label">Total Posts</div>
+            </div>
+            <div className="profile-stat-card">
+              <div className="profile-stat-value">{data?.dashboard?.totalViews || 0}</div>
+              <div className="profile-stat-label">Total Views</div>
+            </div>
+            <div className="profile-stat-card">
+              <div className="profile-stat-value">
+                {profile?.created_at ? new Date(profile.created_at).toLocaleDateString('en-US', { month: 'short', year: 'numeric' }) : 'N/A'}
+              </div>
+              <div className="profile-stat-label">Member Since</div>
+            </div>
+          </div>
+
+          {/* Tabs */}
+          <div className="profile-tabs">
+            {['overview', 'posts', 'settings', 'security'].map((tab) => (
+              <button
+                key={tab}
+                onClick={() => setActiveTab(tab)}
+                className={`profile-tab ${activeTab === tab ? 'active' : ''}`}
+              >
+                {tab}
+              </button>
+            ))}
+          </div>
+
+          {/* Layout */}
+          <div className="profile-layout">
+            {/* Sidebar */}
+            <div className="profile-sidebar">
+              <div className="profile-sidebar-card">
+                <h3 className="profile-sidebar-title">Account Info</h3>
+                <div className="profile-sidebar-item">
+                  <span className="profile-sidebar-label">Email</span>
+                  <span className="profile-sidebar-value">{user?.email_confirmed_at ? '✓' : '⚠'}</span>
+                </div>
+                <div className="profile-sidebar-item">
+                  <span className="profile-sidebar-label">Status</span>
+                  <span className="profile-sidebar-value">Active</span>
+                </div>
+                <div className="profile-sidebar-item">
+                  <span className="profile-sidebar-label">Role</span>
+                  <span className="profile-sidebar-value">{profile?.role}</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Main Content */}
+            <div className="profile-main">
+              {activeTab === 'overview' && (
+                <div className="profile-card">
+                  <div className="profile-card-header">
+                    <h2 className="profile-card-title">Profile Information</h2>
+                    <button 
+                      onClick={() => setIsEditing(!isEditing)}
+                      className="profile-btn profile-btn-primary"
+                    >
+                      {isEditing ? 'Cancel' : 'Edit'}
+                    </button>
+                  </div>
+
+                  {isEditing ? (
+                    <form onSubmit={handleSubmit} className="profile-form">
+                      <div className="profile-form-grid">
+                        <div className="profile-form-group">
+                          <label className="profile-form-label">Name</label>
+                          <input
+                            type="text"
+                            value={formData.name}
+                            onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                            className="profile-form-input"
+                            placeholder="Your name"
+                          />
+                        </div>
+                        <div className="profile-form-group">
+                          <label className="profile-form-label">Location</label>
+                          <input
+                            type="text"
+                            value={formData.location}
+                            onChange={(e) => setFormData({ ...formData, location: e.target.value })}
+                            className="profile-form-input"
+                            placeholder="Your location"
+                          />
+                        </div>
+                      </div>
+
+                      <div className="profile-form-group">
+                        <label className="profile-form-label">Bio</label>
+                        <textarea
+                          value={formData.bio}
+                          onChange={(e) => setFormData({ ...formData, bio: e.target.value })}
+                          className="profile-form-textarea"
+                          placeholder="Tell us about yourself"
+                        />
+                      </div>
+
+                      <div className="profile-form-grid">
+                        <div className="profile-form-group">
+                          <label className="profile-form-label">Website</label>
+                          <input
+                            type="url"
+                            value={formData.website}
+                            onChange={(e) => setFormData({ ...formData, website: e.target.value })}
+                            className="profile-form-input"
+                            placeholder="https://example.com"
+                          />
+                        </div>
+                        <div className="profile-form-group">
+                          <label className="profile-form-label">GitHub</label>
+                          <input
+                            type="url"
+                            value={formData.github}
+                            onChange={(e) => setFormData({ ...formData, github: e.target.value })}
+                            className="profile-form-input"
+                            placeholder="https://github.com/username"
+                          />
+                        </div>
+                      </div>
+
+                      <div className="profile-form-actions">
+                        <button type="button" onClick={() => setIsEditing(false)} className="profile-btn" style={{ background: 'rgba(255,255,255,0.05)' }}>
+                          Cancel
+                        </button>
+                        <button type="submit" className="profile-btn profile-btn-primary">
+                          Save Changes
+                        </button>
+                      </div>
+                    </form>
+                  ) : (
+                    <div className="profile-form">
+                      <div className="profile-form-grid">
+                        <div className="profile-form-group">
+                          <label className="profile-form-label">Name</label>
+                          <div className="profile-form-input" style={{ background: 'rgba(10,10,10,0.3)' }}>
+                            {profile?.name || 'Not set'}
                           </div>
-                          <div className="text-sm text-gray-500">
-                            {post.views} views
+                        </div>
+                        <div className="profile-form-group">
+                          <label className="profile-form-label">Location</label>
+                          <div className="profile-form-input" style={{ background: 'rgba(10,10,10,0.3)' }}>
+                            {profile?.location || 'Not set'}
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="profile-form-group">
+                        <label className="profile-form-label">Bio</label>
+                        <div className="profile-form-textarea" style={{ background: 'rgba(10,10,10,0.3)' }}>
+                          {profile?.bio || 'No bio provided'}
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {activeTab === 'posts' && (
+                <div className="profile-card">
+                  <div className="profile-card-header">
+                    <h2 className="profile-card-title">My Posts</h2>
+                  </div>
+
+                  {data?.posts?.length > 0 ? (
+                    <div className="profile-posts-grid">
+                      {data.posts.map((post: any) => (
+                        <div key={post.id} className="profile-post-card">
+                          <div className="profile-post-header">
+                            <h3 className="profile-post-title">{post.title}</h3>
+                            <span className="profile-post-date">
+                              {new Date(post.created_at).toLocaleDateString()}
+                            </span>
+                          </div>
+                          <p className="profile-post-content">{post.content}</p>
+                          <div className="profile-post-footer">
+                            <div className="profile-post-tags">
+                              {post.tags?.map((tag: string) => (
+                                <span key={tag} className="profile-post-tag">{tag}</span>
+                              ))}
+                            </div>
+                            <div className="profile-post-actions">
+                              <button className="profile-post-btn profile-post-btn-edit">Edit</button>
+                              <button className="profile-post-btn profile-post-btn-delete">Delete</button>
+                            </div>
                           </div>
                         </div>
                       ))}
                     </div>
                   ) : (
-                    <p className="text-gray-500">No recent activity</p>
+                    <div className="profile-empty-state">
+                      <svg className="profile-empty-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                      </svg>
+                      <h3 className="profile-empty-title">No posts yet</h3>
+                      <p className="profile-empty-text">Start writing your first post to share with the community</p>
+                      <button className="profile-btn profile-btn-primary">Create New Post</button>
+                    </div>
                   )}
                 </div>
-              </div>
-            )}
+              )}
 
-            {activeTab === 'posts' && (
-              <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
-                <h2 className="text-xl font-semibold mb-6">My Posts</h2>
-                {data?.posts?.length > 0 ? (
-                  <div className="space-y-4">
-                    {data.posts.map((post: any) => (
-                      <div
-                        key={post.id}
-                        className="border border-gray-200 dark:border-gray-700 rounded-lg p-4 hover:shadow-md transition"
-                      >
-                        <div className="flex justify-between items-start mb-2">
-                          <h3 className="font-semibold text-lg">{post.title}</h3>
-                          <span className="text-sm text-gray-500">
-                            {new Date(post.created_at).toLocaleDateString()}
-                          </span>
-                        </div>
-                        <p className="text-gray-600 dark:text-gray-400 mb-3 line-clamp-2">
-                          {post.content}
-                        </p>
-                        <div className="flex justify-between items-center">
-                          <div className="flex space-x-2">
-                            {post.tags?.map((tag: string) => (
-                              <span
-                                key={tag}
-                                className="px-2 py-1 text-xs bg-gray-100 dark:bg-gray-700 rounded"
-                              >
-                                {tag}
-                              </span>
-                            ))}
-                          </div>
-                          <div className="flex space-x-2">
-                            <button className="text-indigo-600 hover:text-indigo-800">
-                              Edit
-                            </button>
-                            <button className="text-red-600 hover:text-red-800">
-                              Delete
-                            </button>
-                          </div>
-                        </div>
+              {activeTab === 'settings' && (
+                <div className="profile-card">
+                  <div className="profile-card-header">
+                    <h2 className="profile-card-title">Settings</h2>
+                  </div>
+
+                  <div className="profile-settings-section">
+                    <h3 className="profile-settings-title">Notifications</h3>
+                    <div className="profile-settings-list">
+                      <div className="profile-setting-item">
+                        <label className="profile-setting-label">
+                          <input type="checkbox" defaultChecked className="profile-checkbox" />
+                          <span className="profile-setting-text">Email notifications</span>
+                        </label>
                       </div>
-                    ))}
-                  </div>
-                ) : (
-                  <div className="text-center py-12">
-                    <svg
-                      className="w-16 h-16 text-gray-400 mx-auto mb-4"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-                      />
-                    </svg>
-                    <h3 className="text-lg font-semibold mb-2">No posts yet</h3>
-                    <p className="text-gray-500 mb-4">
-                      Start writing your first post to share with the community
-                    </p>
-                    <button className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition">
-                      Create New Post
-                    </button>
-                  </div>
-                )}
-              </div>
-            )}
-
-            {activeTab === 'settings' && (
-              <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
-                <h2 className="text-xl font-semibold mb-6">Account Settings</h2>
-                <div className="space-y-6">
-                  {/* Notification Settings */}
-                  <div>
-                    <h3 className="font-medium mb-4">Notification Preferences</h3>
-                    <div className="space-y-3">
-                      <label className="flex items-center">
-                        <input type="checkbox" className="rounded text-indigo-600" defaultChecked />
-                        <span className="ml-2">Email notifications</span>
-                      </label>
-                      <label className="flex items-center">
-                        <input type="checkbox" className="rounded text-indigo-600" defaultChecked />
-                        <span className="ml-2">Push notifications</span>
-                      </label>
-                      <label className="flex items-center">
-                        <input type="checkbox" className="rounded text-indigo-600" />
-                        <span className="ml-2">Marketing emails</span>
-                      </label>
+                      <div className="profile-setting-item">
+                        <label className="profile-setting-label">
+                          <input type="checkbox" defaultChecked className="profile-checkbox" />
+                          <span className="profile-setting-text">Push notifications</span>
+                        </label>
+                      </div>
+                      <div className="profile-setting-item">
+                        <label className="profile-setting-label">
+                          <input type="checkbox" className="profile-checkbox" />
+                          <span className="profile-setting-text">Marketing emails</span>
+                        </label>
+                      </div>
                     </div>
                   </div>
 
-                  {/* Privacy Settings */}
-                  <div>
-                    <h3 className="font-medium mb-4">Privacy</h3>
-                    <div className="space-y-3">
-                      <label className="flex items-center">
-                        <input type="checkbox" className="rounded text-indigo-600" defaultChecked />
-                        <span className="ml-2">Make profile public</span>
-                      </label>
-                      <label className="flex items-center">
-                        <input type="checkbox" className="rounded text-indigo-600" defaultChecked />
-                        <span className="ml-2">Show email to others</span>
-                      </label>
+                  <div className="profile-settings-section">
+                    <h3 className="profile-settings-title">Privacy</h3>
+                    <div className="profile-settings-list">
+                      <div className="profile-setting-item">
+                        <label className="profile-setting-label">
+                          <input type="checkbox" defaultChecked className="profile-checkbox" />
+                          <span className="profile-setting-text">Make profile public</span>
+                        </label>
+                      </div>
+                      <div className="profile-setting-item">
+                        <label className="profile-setting-label">
+                          <input type="checkbox" className="profile-checkbox" />
+                          <span className="profile-setting-text">Show email to others</span>
+                        </label>
+                      </div>
                     </div>
                   </div>
 
-                  <button className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition">
-                    Save Settings
-                  </button>
+                  <button className="profile-btn profile-btn-primary">Save Settings</button>
                 </div>
-              </div>
-            )}
+              )}
 
-            {activeTab === 'security' && (
-              <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
-                <h2 className="text-xl font-semibold mb-6">Security</h2>
-                <div className="space-y-6">
-                  <div>
-                    <h3 className="font-medium mb-2">Change Password</h3>
-                    <p className="text-gray-500 text-sm mb-4">
-                      Update your password to keep your account secure
-                    </p>
-                    <div className="space-y-4 max-w-md">
-                      <div>
-                        <label className="block text-sm mb-1">Current Password</label>
-                        <input
-                          type="password"
-                          className="w-full px-3 py-2 border rounded-lg"
-                          placeholder="••••••••"
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-sm mb-1">New Password</label>
-                        <input
-                          type="password"
-                          className="w-full px-3 py-2 border rounded-lg"
-                          placeholder="••••••••"
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-sm mb-1">Confirm New Password</label>
-                        <input
-                          type="password"
-                          className="w-full px-3 py-2 border rounded-lg"
-                          placeholder="••••••••"
-                        />
-                      </div>
-                      <button className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition">
-                        Update Password
-                      </button>
+              {activeTab === 'security' && (
+                <div className="profile-card">
+                  <div className="profile-card-header">
+                    <h2 className="profile-card-title">Security</h2>
+                  </div>
+
+                  <form className="profile-form" style={{ maxWidth: '500px' }}>
+                    <div className="profile-form-group">
+                      <label className="profile-form-label">Current Password</label>
+                      <input type="password" className="profile-form-input" placeholder="••••••••" />
                     </div>
-                  </div>
-
-                  <div className="pt-6 border-t border-gray-200 dark:border-gray-700">
-                    <h3 className="font-medium mb-2">Two-Factor Authentication</h3>
-                    <p className="text-gray-500 text-sm mb-4">
-                      Add an extra layer of security to your account
-                    </p>
-                    <button className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition">
-                      Enable 2FA
-                    </button>
-                  </div>
+                    <div className="profile-form-group">
+                      <label className="profile-form-label">New Password</label>
+                      <input type="password" className="profile-form-input" placeholder="••••••••" />
+                    </div>
+                    <div className="profile-form-group">
+                      <label className="profile-form-label">Confirm New Password</label>
+                      <input type="password" className="profile-form-input" placeholder="••••••••" />
+                    </div>
+                    <button type="submit" className="profile-btn profile-btn-primary">Update Password</button>
+                  </form>
                 </div>
-              </div>
-            )}
+              )}
+            </div>
           </div>
         </div>
       </div>
